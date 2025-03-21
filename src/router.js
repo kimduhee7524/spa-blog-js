@@ -1,14 +1,29 @@
 export const router = function () {
-  const routes = {};
+  const routes = [];
 
   function addRoute(path, pageRenderer) {
-    routes[path] = pageRenderer;
+    const regex = new RegExp("^" + path.replace(/:([^/]+)/g, "([^/]+)") + "$");
+    routes.push({
+      path,
+      regex,
+      pageRenderer,
+    });
   }
 
   function render(path) {
-    const pageRenderer = routes[path] || routes["/404"];
-    if (pageRenderer) {
-      document.querySelector("#content").innerHTML = pageRenderer();
+    for (const route of routes) {
+      const match = path.match(route.regex);
+      if (match) {
+        const param = match[1];
+        const html = route.pageRenderer(param);
+        document.querySelector("#content").innerHTML = html;
+        return;
+      }
+    }
+
+    const notFound = routes.find((r) => r.path === "/404");
+    if (notFound) {
+      document.querySelector("#content").innerHTML = notFound.pageRenderer();
     }
   }
 

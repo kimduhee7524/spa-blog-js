@@ -8,7 +8,7 @@ const myRouter = router();
 window.router = myRouter;
 myRouter.addRoute("/", Home);
 myRouter.addRoute("/404", NotFound);
-myRouter.addRoute("/post", PostDetail);
+myRouter.addRoute("/post/:id", PostDetail);
 
 function main() {
   document.querySelector("#app").innerHTML = `
