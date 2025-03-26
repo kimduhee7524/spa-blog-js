@@ -5,7 +5,6 @@ import { NotFound } from "./pages/NotFound.js";
 import { PostDetail } from "./pages/PostDetail.js";
 
 const myRouter = router();
-window.router = myRouter;
 myRouter.addRoute("/", Home);
 myRouter.addRoute("/404", NotFound);
 myRouter.addRoute("/post/:id", PostDetail);
@@ -22,4 +21,19 @@ function main() {
 document.addEventListener("DOMContentLoaded", () => {
   main();
   myRouter.initRouter();
+});
+
+document.body.addEventListener("click", (e) => {
+  const card = e.target.closest(".post-card");
+  if (card) {
+    const postId = card.dataset.postId;
+    myRouter.navigateTo(`/post/${postId}`);
+  }
+});
+
+document.body.addEventListener("click", (e) => {
+  const homeBtn = e.target.closest(".home-btn");
+  if (homeBtn) {
+    myRouter.navigateTo("/");
+  }
 });
