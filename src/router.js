@@ -5,12 +5,17 @@ export const router = (function () {
     const routes = [];
 
     function addRoute(path, pageRenderer) {
-      const regex = new RegExp(
-        "^" + path.replace(/:([^/]+)/g, "([^/]+)") + "$"
-      );
+      const paramNames = [];
+      const regexPath = path.replace(/:([^/]+)/g, (_, paramName) => {
+        paramNames.push(paramName);
+        return "([^/]+)";
+      });
+      const regex = new RegExp("^" + regexPath + "$");
+
       routes.push({
         path,
         regex,
+        paramNames,
         pageRenderer,
       });
     }
@@ -19,8 +24,12 @@ export const router = (function () {
       for (const route of routes) {
         const match = path.match(route.regex);
         if (match) {
-          const param = match[1];
-          const html = route.pageRenderer(param);
+          const params = {};
+          route.paramNames.forEach((name, i) => {
+            params[name] = match[i + 1];
+          });
+
+          const html = route.pageRenderer(params);
           document.querySelector("#content").innerHTML = html;
           return;
         }
@@ -28,7 +37,16 @@ export const router = (function () {
 
       const notFound = routes.find((r) => r.path === "/404");
       if (notFound) {
-        document.querySelector("#content").innerHTML = notFound.pageRenderer();
+        let contentElement = document.querySelector("#content");
+
+        if (!contentElement) {
+          contentElement = document.createElement("main");
+          contentElement.id = "content";
+          contentElement.className =
+            "bg-gray-100 min-h-screen flex justify-center";
+          document.body.appendChild(contentElement);
+        }
+        contentElement.innerHTML = notFound.pageRenderer();
       }
     }
 
