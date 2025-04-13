@@ -65,7 +65,7 @@ export const router = (function () {
       console.log(routes);
     }
 
-    return { addRoute, navigateTo, initRouter };
+    return { addRoute, navigateTo, initRouter, render };
   }
 
   return function () {
