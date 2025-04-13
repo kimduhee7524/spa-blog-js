@@ -1,4 +1,5 @@
 import { useState } from "../useState.js";
+import { useEffect } from "../useEffect.js";
 
 export function PostComments({ id, commentId }) {
   const [commentCount, setCommentCount] = useState(0);
@@ -12,6 +13,10 @@ export function PostComments({ id, commentId }) {
     setLikeCount(LikeCount + 1);
     console.log(LikeCount);
   };
+
+  useEffect(() => {
+    console.log("useEffect 실행");
+  }, []);
 
   return `
     <div class="container mx-auto p-4">
