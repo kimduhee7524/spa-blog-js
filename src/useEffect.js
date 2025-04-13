@@ -1,19 +1,31 @@
 const effectQueue = [];
-const effectHistory = [];
+const effectDeps = [];
 let effectIndex = 0;
 
 export function useEffect(callback, deps) {
   const currentIndex = effectIndex++;
 
-  // deps가 []이고, 처음 실행인 경우
-  if (Array.isArray(deps) && deps.length === 0) {
-    const alreadyRun = effectHistory[currentIndex];
+  if (Array.isArray(deps)) {
+    const prevDeps = effectDeps[currentIndex];
+    let hasChanged = false;
 
-    if (!alreadyRun) {
+    if (!prevDeps) {
+      hasChanged = true;
+    } else {
+      for (let i = 0; i < deps.length; i++) {
+        if (deps[i] !== prevDeps[i]) {
+          hasChanged = true;
+          break;
+        }
+      }
+    }
+
+    if (hasChanged) {
       effectQueue.push(callback);
-      effectHistory[currentIndex] = true;
+      effectDeps[currentIndex] = deps;
     }
   } else {
+    // 의존성 배열이 없으면 항상 실행
     effectQueue.push(callback);
   }
 }

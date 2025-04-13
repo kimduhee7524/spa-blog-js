@@ -16,7 +16,7 @@ export function PostComments({ id, commentId }) {
 
   useEffect(() => {
     console.log("useEffect 실행");
-  }, []);
+  }, [commentCount]);
 
   return `
     <div class="container mx-auto p-4">
