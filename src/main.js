@@ -1,4 +1,5 @@
 import { router } from "./router.js";
+import "./renderController.js";
 import { header } from "./components/Header.js";
 import { Home } from "./pages/Home.js";
 import { NotFound } from "./pages/NotFound.js";
