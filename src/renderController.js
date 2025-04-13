@@ -9,7 +9,6 @@ const originalRender = myRouter.render;
 myRouter.render = function (path) {
   resetStateIndex();
   const result = originalRender.call(this, path);
-  console.log("렌더링 완료");
   runEffects();
   return result;
 };
@@ -18,7 +17,9 @@ myRouter.render = function (path) {
 const originalNavigate = myRouter.navigateTo;
 myRouter.navigateTo = function (path) {
   clearStates();
-  return originalNavigate.call(this, path);
+  const result = originalNavigate.call(this, path);
+  runEffects();
+  return result;
 };
 
 export { myRouter };
