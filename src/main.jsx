@@ -1,7 +1,11 @@
+/** @jsx createVirtualElement */
+import { createVirtualElement, render } from "./core/dom.js";
 import { router } from "./router.js";
+import "./style.css";
 import "./renderController.js";
-import { header } from "./components/Header.js";
-import { Home } from "./pages/Home.js";
+
+import App from "./App.jsx";
+import { Home } from "./pages/Home.jsx";
 import { NotFound } from "./pages/NotFound.js";
 import { PostDetail } from "./pages/PostDetail.js";
 import { PostComments } from "./pages/PostComments.js";
@@ -13,12 +17,8 @@ myRouter.addRoute("/post/:id", PostDetail);
 myRouter.addRoute("/post/:id/comments/:commentId", PostComments);
 
 function main() {
-  document.querySelector("#app").innerHTML = `
-    <div class="app-container">
-      ${header()}
-      <main id="content" class="bg-gray-100 min-h-screen flex justify-center"></main>
-    </div>
-  `;
+  const root = document.querySelector("#app");
+  render(<App />, root);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
