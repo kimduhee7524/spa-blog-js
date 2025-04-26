@@ -1,12 +1,14 @@
-import { createRealElement } from "./core/dom.js"; // 가상돔 → 진짜 DOM
 
-export const router = (function () {
+import { createVirtualElement } from "./core/dom.js";
+
+const createRouter = (function () {
   let instance;
 
   function createRouter() {
     const routes = [];
+    const listeners = []; // URL 변경 시 실행할 콜백 함수 저장
 
-    function addRoute(path, pageRenderer) {
+    function addRoute(path, component) {
       const paramNames = [];
       const regexPath = path.replace(/:([^/]+)/g, (_, paramName) => {
         paramNames.push(paramName);
@@ -14,15 +16,10 @@ export const router = (function () {
       });
       const regex = new RegExp("^" + regexPath + "$");
 
-      routes.push({
-        path,
-        regex,
-        paramNames,
-        pageRenderer,
-      });
+      routes.push({ path, regex, paramNames, component });
     }
-
-    function renderRoute(path) {
+    
+    function getCurrentComponent(path = window.location.pathname) {
       for (const route of routes) {
         const match = path.match(route.regex);
         if (match) {
@@ -30,59 +27,37 @@ export const router = (function () {
           route.paramNames.forEach((name, i) => {
             params[name] = match[i + 1];
           });
-
-          const vnode = route.pageRenderer(params); // JSX → VDOM
-          const container = document.querySelector("#content");
-
-          if (container) {
-            const el = createRealElement(vnode); // VDOM → DOM
-            container.innerHTML = ""; // 기존 내용 초기화
-            container.appendChild(el); // 새로 렌더링된 DOM 붙이기
-          }
-
-          return;
+          return () => createVirtualElement(route.component, params);
         }
       }
-
-      // 404 fallback 처리
-      const notFound = routes.find((r) => r.path === "/404");
-      if (notFound) {
-        const vnode = notFound.pageRenderer();
-        let container = document.querySelector("#content");
-
-        if (!container) {
-          container = document.createElement("main");
-          container.id = "content";
-          container.className = "bg-gray-100 min-h-screen flex justify-center";
-          document.body.appendChild(container);
-        }
-
-        const el = createRealElement(vnode);
-        container.innerHTML = "";
-        container.appendChild(el);
-      }
+      return null;
     }
 
     function navigateTo(path) {
-      history.pushState(null, "", path);
-      renderRoute(path);
+      if (window.location.pathname !== path) {
+        history.pushState(null, "", path);
+        listeners.forEach(fn => fn(path));
+      }
     }
 
-    function initRouter() {
+    function listen(fn) {
+      listeners.push(fn);
+    }
+
+    function start() {
       window.addEventListener("popstate", () => {
         const path = window.location.pathname || "/";
-        renderRoute(path);
+        listeners.forEach(fn => fn(path));
       });
-
-      const path = window.location.pathname || "/";
-      renderRoute(path);
     }
+
 
     return {
       addRoute,
+      getCurrentComponent,
       navigateTo,
-      initRouter,
-      render: renderRoute, // 외부에서 접근 가능하게
+      listen,
+      start,
     };
   }
 
@@ -93,3 +68,6 @@ export const router = (function () {
     return instance;
   };
 })();
+
+export const router = createRouter();
+
