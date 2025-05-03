@@ -1,5 +1,5 @@
 /** @jsx createVirtualElement */
-import { createVirtualElement } from "../core/createVirtualElement.js";
+import { createVirtualElement } from "../core/dom.js";
 
 import { PostList } from "../components/PostList.jsx";
 import { posts } from "../mocks/post.json";

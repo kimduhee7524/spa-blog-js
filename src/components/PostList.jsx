@@ -1,5 +1,5 @@
 /** @jsx createVirtualElement */
-import { createVirtualElement } from "../core/createVirtualElement.js";
+import { createVirtualElement } from "../core/dom.js";
 
 import { PostCard } from "./PostCard.jsx";
 
