@@ -9,7 +9,7 @@ export function createVirtualElement(type, props, ...children) {
 }
 
 export function createRealElement(vNode) {
-  // console.log("vnode", vNode);  
+  // console.log("vnode", vNode);
 
   // 텍스트인 경우
   if (typeof vNode === "string" || typeof vNode === "number") {
@@ -23,22 +23,30 @@ export function createRealElement(vNode) {
     return fragment;
   }
 
-  // 컴포넌트 함수인 경우 
+  // 컴포넌트 함수인 경우
   if (typeof vNode.type === "function") {
     return createRealElement(
-      vNode.type(vNode.props || {})
+      vNode.type({ ...vNode.props, children: vNode.children })
     );
   }
 
   // 일반 태그인 경우
   const el = document.createElement(vNode.type);
 
-  // 속성 붙이기 
+  // 속성 붙이기
   for (const [key, value] of Object.entries(vNode.props || {})) {
     if (key === "className") {
       el.setAttribute("class", value);
+    } else if (key === "disabled") {
+      el.disabled = Boolean(value);
+    } else if (key === "value") {
+      el.value = value;
+    } else if (key === "style") {
+      for (const [styleKey, styleValue] of Object.entries(value)) {
+        el.style[styleKey] = styleValue;
+      }
     } else if (key.startsWith("on") && typeof value === "function") {
-      el.addEventListener(key.slice(2).toLowerCase(), value); 
+      el.addEventListener(key.slice(2).toLowerCase(), value);
     } else {
       el.setAttribute(key, value);
     }
@@ -104,14 +112,13 @@ function updateElement(parent, oldVNode, newVNode, index = 0) {
   }
 }
 
-
 function updateProps(dom, oldProps = {}, newProps = {}) {
   // 새로운 props 적용
   for (const [key, value] of Object.entries(newProps)) {
     if (key === "className") {
       dom.setAttribute("class", value);
     } else if (key.startsWith("on") && typeof value === "function") {
-      dom[key.toLowerCase()] = value;  
+      dom[key.toLowerCase()] = value;
     } else {
       dom.setAttribute(key, value);
     }
@@ -123,7 +130,7 @@ function updateProps(dom, oldProps = {}, newProps = {}) {
       if (key === "className") {
         dom.removeAttribute("class");
       } else if (key.startsWith("on")) {
-        dom[key.toLowerCase()] = null;  
+        dom[key.toLowerCase()] = null;
       } else {
         dom.removeAttribute(key);
       }
@@ -141,5 +148,5 @@ export function renderElement(newVNode, container) {
   }
 
   // 업데이트 후 가상돔 저장
-  oldVNode = newVNode; 
+  oldVNode = newVNode;
 }

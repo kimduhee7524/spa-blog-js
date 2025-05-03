@@ -1,4 +1,3 @@
-
 import { createVirtualElement } from "./core/dom.js";
 
 const createRouter = (function () {
@@ -16,9 +15,17 @@ const createRouter = (function () {
       });
       const regex = new RegExp("^" + regexPath + "$");
 
-      routes.push({ path, regex, paramNames, component });
+      // 정적 갯수 계산
+      const staticCount = path
+        .split("/")
+        .filter((p) => p && !p.startsWith(":")).length;
+
+      routes.push({ path, regex, paramNames, component, staticCount });
+
+      // 정적 갯수 많은 순서로 정렬
+      routes.sort((a, b) => b.staticCount - a.staticCount);
     }
-    
+
     function getCurrentComponent(path = window.location.pathname) {
       for (const route of routes) {
         const match = path.match(route.regex);
@@ -36,7 +43,7 @@ const createRouter = (function () {
     function navigateTo(path) {
       if (window.location.pathname !== path) {
         history.pushState(null, "", path);
-        listeners.forEach(fn => fn(path));
+        listeners.forEach((fn) => fn(path));
       }
     }
 
@@ -47,10 +54,9 @@ const createRouter = (function () {
     function start() {
       window.addEventListener("popstate", () => {
         const path = window.location.pathname || "/";
-        listeners.forEach(fn => fn(path));
+        listeners.forEach((fn) => fn(path));
       });
     }
-
 
     return {
       addRoute,
@@ -70,4 +76,3 @@ const createRouter = (function () {
 })();
 
 export const router = createRouter();
-
